@@ -1,4 +1,4 @@
-name: Auto Render Deep Space Video
+name: Auto Render Digital Mind Video
 
 on:
   repository_dispatch:
