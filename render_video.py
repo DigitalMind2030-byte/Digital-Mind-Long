@@ -13,13 +13,14 @@ pexels_key = os.environ.get('PEXELS_API_KEY')
 chat_id = os.environ.get('CHAT_ID')
 telegram_token = os.environ.get('TELEGRAM_BOT_TOKEN')
 
-# 👇 USA Channel Name Updated for New Channel 👇
-channel_name = "Digital Mind®" 
+# 👇 USA Channel Name (Updated for Urban Decoded) 👇
+channel_name = "UD®" 
 
 print(f"DEBUG: Processing {len(scenes_data)} scenes async...")
 
-# --- SMART DYNAMIC FALLBACK KEYWORDS (Updated for Tech/Dystopia Niche) ---
-fallback_env = os.environ.get('FALLBACK_KEYWORDS', 'scrolling phone in dark, abstract digital data, glowing screen reflection, server room lights, cyber security, typing in dark')
+# --- SMART DYNAMIC FALLBACK KEYWORDS ---
+# GitHub Actions se jo bhi fallback theme aayegi, yeh usey list mein badal dega.
+fallback_env = os.environ.get('FALLBACK_KEYWORDS', 'city night, time lapse traffic, abstract architecture, modern building, neon street, subway crowd')
 FALLBACK_KEYWORDS = [kw.strip() for kw in fallback_env.split(',')]
 
 TEMP_DIR = "/dev/shm" if os.path.exists("/dev/shm") else os.getcwd()
@@ -30,10 +31,12 @@ async def fetch_pexels_video(session, keyword):
         for attempt in range(2):
             try:
                 await asyncio.sleep(random.uniform(0.1, 0.5))
+                # Jab attempts badhein toh safe page=1 rakho taaki khali result na aaye
                 random_page = random.randint(1, 5) if attempt == 0 else 1 
                 url = f"https://api.pexels.com/videos/search?query={urllib.parse.quote(query)}&per_page=5&page={random_page}&orientation=landscape&size=large"
                 
                 async with session.get(url, headers={"Authorization": pexels_key}, timeout=10) as response:
+                    # [IMPROVED]: Added Rate Limit (429) Handling
                     if response.status == 429:
                         await asyncio.sleep(2)
                         continue
@@ -115,6 +118,7 @@ async def process_scene(session, i, scene):
         pop_path = os.path.abspath("pop.mp3")
         has_pop = os.path.exists(pop_path)
 
+        # 👇 Changes verified here: y=40 is set for Top-Right positioning 👇
         if is_valid_video:
             cmd = ['ffmpeg', '-y', '-ignore_editlist', '1', '-stream_loop', '-1', '-fflags', '+genpts', '-i', vid_path, '-ss', '0.2', '-i', raw_mp3]
             if has_pop: cmd += ['-i', pop_path]
@@ -210,7 +214,7 @@ async def main_pipeline():
         run_id = os.environ.get('GITHUB_RUN_ID', str(int(time.time())))
         tag_name = f"vid-{run_id}"
         
-        # 👇 Repo name updated as per screenshots 👇
+        # 👇 Repo name updated for the respective workflow 👇
         repo_name = os.environ.get('GITHUB_REPOSITORY', "DigitalMind2030-byte/Digital-Mind-Long") 
         
         try:
